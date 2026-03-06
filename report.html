@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: #f0f4f8; font-family: 'Inter',sans-serif; }
+        .card { background: white; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        .metric-title { font-size: 0.875rem; color: #6b7280; }
+        .metric-value { font-size: 1.75rem; font-weight: 600; color: #111827; }
+        .metric-sub { font-size: 0.75rem; color: #10b981; }
+        .tabs button { padding: .5rem 1rem; border-radius: .5rem; font-weight: 500; }
+        .tabs .active { background: #1f2937; color: #fff; }
+        .fade-in { animation: fadeIn 0.6s ease-in-out; }
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-400 via-slate-600 to-blue-100 text-slate-800">
+    <!-- header & sidebar copy from other pages -->
+    <header class="bg-white/80 backdrop-blur-md shadow-md border-b border-slate-300/50 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <button class="md:hidden p-2 rounded-md text-slate-600 hover:text-slate-800" onclick="toggleMenu()">
+                    <i class="fas fa-bars fa-lg"></i>
+                </button>
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
+                        <i class="fas fa-dolly"></i>
+                    </div>
+                    <a href="dashboard.html" class="text-2xl font-bold text-slate-800 hover:text-blue-600 transition">Inventory Hub</a>
+                </div>
+            </div>
+            <nav class="flex items-center gap-6">
+                <button class="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 transition">
+                    <i class="fas fa-bell"></i>
+                    <span class="text-xs">Alerts</span>
+                </button>
+                <a href="login_page.html" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-700 transition text-sm font-medium">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="hidden sm:inline">Logout</span>
+                </a>
+            </nav>
+        </div>
+    </header>
+    <div id="overlay" class="hidden fixed inset-0 bg-black/30 md:hidden z-30" onclick="toggleMenu()"></div>
+    <div class="flex min-h-screen">
+        
+        <aside id="sidebar" class="sidebar fixed md:relative w-64 md:w-auto h-screen md:h-auto bg-white/90 backdrop-blur-md border-r border-slate-300/50 md:border-r-0 z-40 md:z-0 transform md:transform-none md:w-56">
+            <div class="p-6 space-y-8">
+                <div class="hidden md:block"></div>
+                
+                <nav class="space-y-1">
+                    <h3 class="text-xs font-semibold text-slate-600 uppercase tracking-wider px-3 mb-4">Main Menu</h3>
+                    
+                    <a href="dashboard.html" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg bg-blue-100/80 text-blue-700 border border-blue-300/30">
+                        <i class="fas fa-chart-line w-5"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    
+                    <a href="inventory.html" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100">
+                        <i class="fas fa-list w-5"></i>
+                        <span>Inventory List</span>
+                    </a>
+
+                    <a href="Add_product.html" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100">
+                        <i class="fas fa-box w-5"></i>
+                        <span>Add Product</span>
+                    </a>
+                    
+                    <a href="report.html" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100">
+                        <i class="fas fa-chart-bar w-5"></i>
+                        <span>Report</span>
+                    </a>
+                    
+                </nav>
+
+                <nav class="space-y-1">
+                    <h3 class="text-xs font-semibold text-slate-600 uppercase tracking-wider px-3 mb-4">Tools</h3>
+                    
+                    <a href="setting.html" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100">
+                        <i class="fas fa-cog w-5"></i>
+                        <span>Settings</span>
+                    </a>
+                    
+                    <a href="export.html" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100">
+                        <i class="fas fa-file-export w-5"></i>
+                        <span>Export</span>
+                    </a>
+                </nav>
+            </div>
+        </aside>
+        
+        <main class="flex-1 overflow-x-hidden p-6">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h1 class="text-3xl font-bold text-slate-800">Reports</h1>
+                        <p class="text-slate-600">Analyze your inventory performance</p>
+                    </div>
+                    <button class="px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-900 flex items-center gap-2">
+                        <i class="fas fa-download"></i> Export Report
+                    </button>
+                </div>
+                <div class="tabs mb-6 flex gap-2">
+                    <button class="active">Overview</button>
+                    <button>Products</button>
+                    <button>Alerts</button>
+                </div>
+                <!-- overview metrics -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                    <div class="card">
+                        <div class="metric-title">Total Stock Value</div>
+                        <div class="metric-value">$78,540</div>
+                        <div class="metric-sub">+12.5% from last month</div>
+                    </div>
+                    <div class="card">
+                        <div class="metric-title">Total Products</div>
+                        <div class="metric-value">1,234</div>
+                        <div class="metric-sub">Across 4 categories</div>
+                    </div>
+                    <div class="card">
+                        <div class="metric-title">Stock Turnover</div>
+                        <div class="metric-value">4.2x</div>
+                        <div class="metric-sub">+0.5 from last month</div>
+                    </div>
+                </div>
+                <!-- charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="card">
+                        <h2 class="font-semibold mb-2">Stock Value Trend</h2>
+                        <canvas id="valueTrendChart" height="200"></canvas>
+                    </div>
+                    <div class="card">
+                        <h2 class="font-semibold mb-2">Category Distribution</h2>
+                        <canvas id="categoryChart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>
+        // toggle sidebar
+        function toggleMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('hidden-mobile');
+            overlay.classList.toggle('hidden');
+        }
+        // charts init with static data
+        const ctx1 = document.getElementById('valueTrendChart').getContext('2d');
+        new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul'],
+                datasets: [{
+                    label: 'Value',
+                    data: [65000,72000,68000,74000,80000,82000,78000],
+                    borderColor: '#3b82f6',
+                    tension: 0.4,
+                    fill: false
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } } }
+        });
+        const ctx2 = document.getElementById('categoryChart').getContext('2d');
+        new Chart(ctx2, {
+            type: 'pie',
+            data: {
+                labels: ['Electronics','Furniture','Clothing','Stationery'],
+                datasets: [{ data: [40,25,20,15], backgroundColor: ['#3b82f6','#10b981','#8b5cf6','#f59e0b'] }]
+            },
+            options: { responsive: true }
+        });
+    </script>
+</body>
+</html>

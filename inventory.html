@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory List</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* global body style */
+        body { 
+            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        /* container card for inventory table */
+        .table-container {
+            max-width: 960px;
+            margin: 2.5rem auto;
+            background: rgba(255,255,255,0.95);
+            border-radius: 0.75rem;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+            padding: 1.5rem;
+        }
+        /* search field style override */
+        .search-input {
+            width: 100%;
+            padding: .5rem 1rem;
+            border: 1px solid #cbd5e1;
+            border-radius: .375rem;
+            transition: border-color 0.2s;
+        }
+        .search-input:focus { border-color: #3b82f6; outline: none; }
+        /* table header row */
+        .table-header { background: #f1f5f9; }
+        /* refresh button style */
+        .btn-refresh {
+            background: #3b82f6;
+            color: white;
+            transition: background 0.2s, transform 0.2s;
+        }
+        .btn-refresh:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+        /* zebra striping for rows */
+        tbody tr:nth-child(odd) { background: #fafafa; }
+        tbody tr:hover { background: #e2e8f0; }
+        /* status badge styles */
+        .badge { padding: .25rem .5rem; border-radius: .375rem; font-size: .75rem; font-weight: 500; }
+        .in-stock { background: #dcfce7; color: #166534; }
+        .low-stock { background: #fef9c3; color: #92400e; }
+        .out-stock { background: #fee2e2; color: #991b1b; }
+        /* category button selected state */
+        .category-btn { transition: background 0.2s, color 0.2s; }
+        .category-btn.active { background: #1f2937; color: #fff; }
+        /* simple fade-in animation */
+        .fade-in { animation: fadeIn 0.6s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-400 via-slate-600 to-blue-100 text-slate-800">
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-md shadow-md border-b border-slate-300/50 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <button class="md:hidden p-2 rounded-md text-slate-600 hover:text-slate-800" onclick="toggleMenu()">
+                    <i class="fas fa-bars fa-lg"></i>
+                </button>
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
+                        <i class="fas fa-dolly"></i>
+                    </div>
+                    <a href="dashboard.html" class="text-2xl font-bold text-slate-800 hover:text-blue-600 transition">Inventory Hub</a>
+                </div>
+            </div>
+            <nav class="flex items-center gap-6">
+                <button class="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 transition">
+                    <i class="fas fa-bell"></i>
+                    <span class="text-xs">Alerts</span>
+                </button>
+                <a href="login_page.html" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-700 transition text-sm font-medium">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="hidden sm:inline">Logout</span>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <div id="overlay" class="hidden fixed inset-0 bg-black/30 md:hidden z-30" onclick="toggleMenu()"></div>
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar fixed md:relative w-64 md:w-auto h-screen md:h-auto bg-white/90 backdrop-blur-md border-r border-slate-300/50 md:border-r-0 z-40 md:z-0 transform md:transform-none md:w-56">
+            <div class="p-6 space-y-8">
+                <div class="hidden md:block"></div>
+                
+                <nav class="space-y-1">
+                    <h3 class="text-xs font-semibold text-slate-600 uppercase tracking-wider px-3 mb-4">Main Menu</h3>
+                    
+                    <a href="dashboard.html" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100">
+                        <i class="fas fa-chart-line w-5"></i>
+                        <span>Dashboard</span>
+                    </a>
+
+                    <a href="inventory.html" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg bg-blue-100/80 text-blue-700 border border-blue-300/30">
+                        <i class="fas fa-list w-5"></i>
+                        <span>Inventory List</span>
+                    </a>
+                    
+                    <a href="Add_product.html" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100">
+                        <i class="fas fa-box w-5"></i>
+                        <span>Add Product</span>
+                    </a>
+                    
+                    <a href="report.html" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100">
+                        <i class="fas fa-chart-bar w-5"></i>
+                        <span>Report</span>
+                    </a>
+                    
+                </nav>
+
+                <nav class="space-y-1">
+                    <h3 class="text-xs font-semibold text-slate-600 uppercase tracking-wider px-3 mb-4">Tools</h3>
+                    
+                    <a href="setting.html" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100">
+                        <i class="fas fa-cog w-5"></i>
+                        <span>Settings</span>
+                    </a>
+                    
+                    <a href="export.html" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100">
+                        <i class="fas fa-file-export w-5"></i>
+                        <span>Export</span>
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-x-hidden">
+            <header class="text-center py-6 bg-gradient-to-r from-slate-700 to-slate-800 rounded-lg text-white shadow-md mx-4">
+                <h1 class="text-3xl font-bold">Inventory List</h1>
+                <p class="opacity-90">Search and view available products</p>
+            </header>
+            <div class="table-container fade-in">
+            <div class="mb-4">
+                <h2 class="text-xl font-semibold text-slate-800">Products</h2>
+                <p class="text-slate-600">A list of all products in your inventory</p>
+                <div id="filterPanel" class="mt-3 flex flex-wrap gap-2">
+                    <button class="category-btn px-3 py-1 rounded-full bg-black text-white">All</button>
+                    <button class="category-btn px-3 py-1 rounded-full bg-white border">Electronics</button>
+                    <button class="category-btn px-3 py-1 rounded-full bg-white border">Furniture</button>
+                    <button class="category-btn px-3 py-1 rounded-full bg-white border">Stationery</button>
+                </div>
+            </div>
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+            <div class="relative w-full md:max-w-sm">
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <input id="searchBox" class="search-input pl-10" type="text" placeholder="Search products...">
+                <button id="filterBtn" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-filter"></i>
+                </button>
+            </div>
+            <button id="refreshBtn" class="btn-refresh px-4 py-2 rounded-lg flex items-center gap-2">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+        </div>
+        <div id="tableWrapper" class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+                <thead class="table-header">
+                    <tr>
+                        <th class="px-4 py-2">Product Name</th>
+                        <th class="px-4 py-2">SKU</th>
+                        <th class="px-4 py-2">Category</th>
+                        <th class="px-4 py-2">Quantity</th>
+                        <th class="px-4 py-2">Price</th>
+                        <th class="px-4 py-2">Status</th>
+                        <th class="px-4 py-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryBody">
+                    <!-- items populated with AJAX -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // example mock JSON, in real app would fetch from server
+        // load inventory from localStorage or fall back to mock data
+        let mockInventory = JSON.parse(localStorage.getItem('inventory')) || [
+            { id: 1, name: 'Laptop Pro 15', sku: 'LAP-001', category: 'Electronics', quantity: 45, price: 1299.00, status: 'in' },
+            { id: 2, name: 'Wireless Mouse', sku: 'MOU-002', category: 'Electronics', quantity: 120, price: 29.00, status: 'in' },
+            { id: 3, name: 'Office Chair', sku: 'CHR-003', category: 'Furniture', quantity: 8, price: 249.00, status: 'low' },
+            { id: 4, name: 'USB Cable', sku: 'CBL-004', category: 'Electronics', quantity: 5, price: 12.00, status: 'low' },
+            { id: 5, name: 'Desk Lamp', sku: 'LMP-005', category: 'Furniture', quantity: 0, price: 45.00, status: 'out' }
+        ];
+        // make sure localStorage is populated if starting from defaults
+        localStorage.setItem('inventory', JSON.stringify(mockInventory));
+
+        function renderTable(data) {
+            const tbody = $('#inventoryBody');
+            tbody.empty();
+            data.forEach(item => {
+                const statusClass = item.status === 'in' ? 'in-stock' : item.status === 'low' ? 'low-stock' : 'out-stock';
+                const statusText = item.status === 'in' ? 'In Stock' : item.status === 'low' ? 'Low Stock' : 'Out of Stock';
+                const row = `<tr class="border-b hover:bg-slate-50">
+                    <td class="px-4 py-2 font-medium">${item.name}</td>
+                    <td class="px-4 py-2 text-gray-500">${item.sku || ''}</td>
+                    <td class="px-4 py-2">${item.category}</td>
+                    <td class="px-4 py-2">${item.quantity}</td>
+                    <td class="px-4 py-2">$${item.price.toFixed(2)}</td>
+                    <td class="px-4 py-2"><span class="badge ${statusClass}">${statusText}</span></td>
+                    <td class="px-4 py-2 flex gap-2 text-lg">
+                        <button class="text-gray-600 hover:text-gray-800"><i class="fas fa-pen"></i></button>
+                        <button data-id="${item.id}" class="delete-btn text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+                tbody.append(row);
+            });
+        }
+
+        function fetchInventory() {
+            // get latest inventory from localStorage (in case it changed elsewhere)
+            mockInventory = JSON.parse(localStorage.getItem('inventory')) || mockInventory;
+            // simulate AJAX call
+            return $.Deferred(function(def) {
+                setTimeout(() => def.resolve(mockInventory), 500);
+            }).promise();
+        }
+
+        $(document).ready(function() {
+            // initial load
+            fetchInventory().then(renderTable);
+
+            $('#refreshBtn').on('click', () => {
+                fetchInventory().then(data => {
+                    renderTable(data);
+                    $('#searchBox').val('');
+                });
+            });
+
+            $('#searchBox').on('input', function() {
+                const term = $(this).val().toLowerCase();
+                const filtered = mockInventory.filter(item =>
+                    item.name.toLowerCase().includes(term) ||
+                    item.category.toLowerCase().includes(term)
+                );
+                renderTable(filtered);
+            });
+
+            // category buttons behavior
+            $('.category-btn').on('click', function() {
+                $('.category-btn').removeClass('active');
+                $(this).addClass('active');
+                const cat = $(this).text();
+                if(cat === 'All') {
+                    renderTable(mockInventory);
+                } else {
+                    renderTable(mockInventory.filter(i => i.category === cat));
+                }
+            });
+
+            // initialize active category
+            $('.category-btn').first().addClass('active');
+
+            // delete row handler via delegation
+            $('#inventoryBody').on('click', '.delete-btn', function() {
+                const id = parseInt($(this).data('id'));
+                const idx = mockInventory.findIndex(i => i.id === id);
+                if (idx !== -1) {
+                    mockInventory.splice(idx, 1);
+                    localStorage.setItem('inventory', JSON.stringify(mockInventory));
+                    renderTable(mockInventory);
+                }
+            });
+
+            // filter panel toggle (for mobile/small screens)
+            $('#filterBtn').on('click', function() {
+                $('#filterPanel').toggle();
+            });
+        });
+
+        // sidebar toggle for mobile
+        function toggleMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('hidden-mobile');
+            overlay.classList.toggle('hidden');
+        }
+    </script>
+</main>
+    </div>
+</body>
+</html>

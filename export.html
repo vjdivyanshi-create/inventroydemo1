@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings - Inventory Hub</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-slate-400 via-slate-600 to-blue-100 text-slate-800">
+
+<!-- HEADER -->
+<header class="bg-white/80 backdrop-blur-md shadow-md border-b sticky top-0 z-50">
+<div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 bg-blue-600 text-white flex items-center justify-center rounded-lg">
+<i class="fas fa-dolly"></i>
+</div>
+<a href="dashboard.html" class="text-xl font-bold">Inventory Hub</a>
+</div>
+
+<nav class="flex items-center gap-4">
+<button class="px-3 py-2 bg-slate-200 rounded-lg">
+<i class="fas fa-bell"></i>
+</button>
+
+<a href="login_page.html" class="px-4 py-2 bg-red-100 text-red-600 rounded-lg">
+Logout
+</a>
+</nav>
+
+</div>
+</header>
+
+<div class="flex min-h-screen">
+
+<!-- SIDEBAR -->
+<aside class="w-56 bg-white/90 backdrop-blur-md border-r">
+
+<div class="p-6">
+
+<h3 class="text-xs font-semibold text-slate-600 uppercase mb-4">
+Main Menu
+</h3>
+
+<a href="dashboard.html"
+class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-100">
+<i class="fas fa-chart-line"></i>
+Dashboard
+</a>
+
+<a href="inventory.html"
+class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-100">
+<i class="fas fa-list"></i>
+Inventory List
+</a>
+
+<a href="Add_product.html"
+class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-100">
+<i class="fas fa-box"></i>
+Add Product
+</a>
+
+<a href="report.html"
+class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-100">
+<i class="fas fa-chart-bar"></i>
+Report
+</a>
+
+<h3 class="text-xs font-semibold text-slate-600 uppercase mt-6 mb-4">
+Tools
+</h3>
+
+<a href="setting.html"
+class="flex items-center gap-3 px-4 py-3 rounded-lg bg-blue-100 text-blue-700">
+<i class="fas fa-cog"></i>
+Settings
+</a>
+
+<a href="export.html"
+class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-100">
+<i class="fas fa-file-export"></i>
+Export
+</a>
+
+</div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="flex-1 p-6">
+<div class="max-w-7xl mx-auto"> 
+<h1 class="text-3xl font-bold text-slate-800 mb-2">
+Export Inventory Data
+</h1>
+
+<p class="text-slate-100 mb-8">
+Download your inventory reports in multiple formats.
+</p>
+
+<div class="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-6">
+
+<!-- PDF EXPORT -->
+<div class="bg-white/80 backdrop-blur-md border border-slate-200 p-6 rounded-xl shadow-lg stat-card">
+
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-xl font-semibold text-slate-700">
+Export PDF
+</h2>
+<i class="fas fa-file-pdf text-red-500 text-3xl"></i>
+</div>
+
+<p class="text-gray-500 mb-4">
+Download inventory report as a PDF file.
+</p>
+
+<button id="pdfBtn"
+class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 flex items-center gap-2">
+<i class="fas fa-download"></i>
+Download PDF
+</button>
+
+</div>
+
+<!-- CSV EXPORT -->
+<div class="bg-white/80 backdrop-blur-md border border-slate-200 p-6 rounded-xl shadow-lg stat-card">
+
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-xl font-semibold text-slate-700">
+Export CSV
+</h2>
+<i class="fas fa-file-csv text-green-500 text-3xl"></i>
+</div>
+
+<p class="text-gray-500 mb-4">
+Export inventory data in CSV format.
+</p>
+
+<button id="csvBtn"
+class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 flex items-center gap-2">
+<i class="fas fa-download"></i>
+Download CSV
+</button>
+
+</div>
+
+<!-- EXCEL EXPORT -->
+<div class="bg-white/80 backdrop-blur-md border border-slate-200 p-6 rounded-xl shadow-lg stat-card">
+
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-xl font-semibold text-slate-700">
+Export Excel
+</h2>
+<i class="fas fa-file-excel text-blue-500 text-3xl"></i>
+</div>
+
+<p class="text-gray-500 mb-4">
+Download inventory spreadsheet.
+</p>
+
+<button id="excelBtn"
+class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center gap-2">
+<i class="fas fa-download"></i>
+Download Excel
+</button>
+
+</div>
+
+</div>
+</div>
+</main>
+
+</div>
+
+
+<!-- JAVASCRIPT -->
+<script>
+
+// Sample inventory data
+const inventory = [
+{ id: 1, name: 'Laptop Pro 15', sku: 'LAP-001', category: 'Electronics', quantity: 45, price: 1299.00, status: 'in' },
+            { id: 2, name: 'Wireless Mouse', sku: 'MOU-002', category: 'Electronics', quantity: 120, price: 29.00, status: 'in' },
+            { id: 3, name: 'Office Chair', sku: 'CHR-003', category: 'Furniture', quantity: 8, price: 249.00, status: 'low' },
+            { id: 4, name: 'USB Cable', sku: 'CBL-004', category: 'Electronics', quantity: 5, price: 12.00, status: 'low' },
+            { id: 5, name: 'Desk Lamp', sku: 'LMP-005', category: 'Furniture', quantity: 0, price: 45.00, status: 'out' }
+];
+
+// Convert to CSV
+function convertToCSV(data){
+let csv = "ID,Product,Quantity,Price\n";
+data.forEach(item=>{
+csv += `${item.id},${item.product},${item.quantity},${item.price}\n`;
+});
+return csv;
+}
+
+// Download file
+function downloadFile(content, fileName, type){
+const blob = new Blob([content], {type});
+const link = document.createElement("a");
+link.href = URL.createObjectURL(blob);
+link.download = fileName;
+link.click();
+}
+
+// CSV
+document.getElementById("csvBtn").addEventListener("click",()=>{
+const csv = convertToCSV(inventory);
+downloadFile(csv,"inventory.csv","text/csv");
+});
+
+// Excel
+document.getElementById("excelBtn").addEventListener("click",()=>{
+const csv = convertToCSV(inventory);
+downloadFile(csv,"inventory.xls","application/vnd.ms-excel");
+});
+
+// PDF (simple text pdf)
+document.getElementById("pdfBtn").addEventListener("click",()=>{
+let text = "Inventory Report\n\n";
+inventory.forEach(item=>{
+text += `ID: ${item.id}  Product: ${item.product}  Qty: ${item.quantity}  Price: ${item.price}\n`;
+});
+downloadFile(text,"inventory_report.pdf","application/pdf");
+});
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease; }
+        body { scroll-behavior: smooth; }
+        .sidebar { transition: transform 0.3s ease; }
+        .sidebar.hidden-mobile { transform: translateX(-100%); }
+        .stat-card { transition: all 0.3s ease; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 12px 24px rgba(0,0,0,0.15); }
+        .menu-item { transition: all 0.2s ease; }
+        .menu-item:hover { padding-left: 8px; }
+        .chart-container { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .pulse-ring { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); } 50% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); } }
+        .btn-primary { transition: all 0.2s ease; }
+        .btn-primary:hover { transform: scale(1.05); }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-400 via-slate-600 to-blue-100 text-slate-800">
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-md shadow-md border-b border-slate-300/50 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
+                        <i class="fas fa-dolly"></i>
+                    </div>
+                    <a href="dashboard.html" class="text-2xl font-bold text-slate-800 hover:text-blue-600 transition">Inventory Hub</a>
+                </div>
+            </div>
+            <nav class="flex items-center gap-6">
+                <button class="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 transition">
+                    <i class="fas fa-bell"></i>
+                    <span class="text-xs">Alerts</span>
+                </button>
+                <a href="login_page.html" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-700 transition text-sm font-medium">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="hidden sm:inline">Logout</span>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div id="overlay" class="hidden fixed inset-0 bg-black/30 md:hidden z-30" onclick="toggleMenu()"></div>
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar fixed md:relative w-64 md:w-auto h-screen md:h-auto bg-white/90 backdrop-blur-md border-r border-slate-300/50 md:border-r-0 z-40 md:z-0 transform md:transform-none md:w-56">
+            <div class="p-6 space-y-8">
+                <div class="hidden md:block"></div>
+                
+                <nav class="space-y-1">
+                    <h3 class="text-xs font-semibold text-slate-600 uppercase tracking-wider px-3 mb-4">Main Menu</h3>
+                    
+                    <a href="dashboard.html" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg bg-blue-100/80 text-blue-700 border border-blue-300/30">
+                        <i class="fas fa-chart-line w-5"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    
+                    <a href="inventory.html" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100">
+                        <i class="fas fa-list w-5"></i>
+                        <span>Inventory List</span>
+                    </a>
+
+                    <a href="Add_product.html" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100">
+                        <i class="fas fa-box w-5"></i>
+                        <span>Add Product</span>
+                    </a>
+                    
+                    <a href="report.html" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100">
+                        <i class="fas fa-chart-bar w-5"></i>
+                        <span>Report</span>
+                    </a>
+                    
+                </nav>
+
+                <nav class="space-y-1">
+                    <h3 class="text-xs font-semibold text-slate-600 uppercase tracking-wider px-3 mb-4">Tools</h3>
+                    
+                    <a href="setting.html" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100">
+                        <i class="fas fa-cog w-5"></i>
+                        <span>Settings</span>
+                    </a>
+                    
+                    <a href="export.html" class="menu-item flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100">
+                        <i class="fas fa-file-export w-5"></i>
+                        <span>Export</span>
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-x-hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <!-- Welcome Section -->
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold mb-2 text-slate-800">Welcome back! 👋</h2>
+                    <p class="text-slate-600">Here's what's happening with your inventory today</p>
+                </div>
+
+                <!-- Key Stats -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8" id="statsContainer">
+                    <!-- Stats will load here via AJAX/jQuery -->
+                </div>
+
+                <!-- Charts Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <div class="lg:col-span-2 bg-white rounded-xl p-6 shadow-lg border border-slate-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-slate-800">Sales & Purchases (Last 7 Days)</h3>
+                            <button id="refreshSalesBtn" class="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded text-sm transition font-medium">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                        <div class="w-full h-64 chart-container">
+                            <canvas id="salesPurchaseChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl p-6 shadow-lg border border-slate-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-slate-800">Inventory by Category</h3>
+                            <button id="refreshCategoryBtn" class="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded text-sm transition font-medium">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                        <div class="w-full h-64 chart-container">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Orders Table -->
+                <div class="bg-white rounded-xl p-6 shadow-lg border border-slate-100 mb-8">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-slate-800">Recent Orders</h3>
+                        <button id="refreshOrdersBtn" class="px-3 py-1 bg-green-100 hover:bg-green-200 text-green-700 rounded text-sm transition font-medium">
+                            <i class="fas fa-sync-alt"></i> Load Orders
+                        </button>
+                    </div>
+                    <div id="loadingSpinner" class="hidden text-center py-8">
+                        <div class="inline-block">
+                            <i class="fas fa-spinner fa-spin text-blue-600 text-2xl"></i>
+                            <p class="text-slate-600 mt-2">Loading orders...</p>
+                        </div>
+                    </div>
+                    <div id="ordersContainer" class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="border-b border-slate-300">
+                                <tr class="text-slate-700 font-medium bg-slate-50">
+                                    <th class="text-left py-3 px-4">Order ID</th>
+                                    <th class="text-left py-3 px-4">Customer</th>
+                                    <th class="text-left py-3 px-4">Amount</th>
+                                    <th class="text-left py-3 px-4">Status</th>
+                                    <th class="text-left py-3 px-4">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersTableBody">
+                                <!-- Orders will load here via AJAX/jQuery -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Alert Messages -->
+                <div id="alertContainer" class="mb-8">
+                    <!-- Alerts will appear here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        
+$(document).ready(function(){
+
+let currentPage = window.location.pathname.split("/").pop();
+
+$(".menu-item").each(function(){
+
+let link = $(this).attr("href");
+
+if(link === currentPage){
+
+$(this).addClass("bg-blue-100 text-blue-700 font-medium");
+
+}
+
+});
+
+});
+
+
+    // ============================================================================
+    // MOCK JSON DATA (In production, this would come from your backend API)
+    // ============================================================================
+    const mockInventoryData = {
+        stats: {
+            totalProducts: 128,
+            lowStock: 12,
+            ordersToday: 34,
+            revenue: 12450,
+            thisWeekProducts: 5,
+            thisMonthRevenue: 8.2
+        },
+        salesData: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            sales: [12, 19, 8, 15, 22, 10, 18],
+            purchases: [5, 8, 12, 6, 9, 14, 7]
+        },
+        categoryData: {
+            labels: ['Electronics', 'Clothing', 'Home', 'Toys', 'Other'],
+            data: [45, 25, 15, 8, 12]
+        },
+        recentOrders: [
+            { id: 'ORD-001', customer: 'John Smith', amount: '$450', status: 'Completed', date: '2026-02-12' },
+            { id: 'ORD-002', customer: 'Sarah Johnson', amount: '$320', status: 'Processing', date: '2026-02-12' },
+            { id: 'ORD-003', customer: 'Mike Williams', amount: '$680', status: 'Shipped', date: '2026-02-11' },
+            { id: 'ORD-004', customer: 'Emma Davis', amount: '$250', status: 'Pending', date: '2026-02-11' },
+            { id: 'ORD-005', customer: 'Alex Brown', amount: '$890', status: 'Completed', date: '2026-02-10' }
+        ]
+    };
+
+    // ============================================================================
+    // JQUERY AJAX FUNCTIONS
+    // ============================================================================
+
+    // Function to simulate AJAX call to fetch JSON data from server
+    function fetchDashboardData(callback) {
+        // This simulates an AJAX call - in production, use $.ajax()
+        $.ajax({
+            url: '#',
+            type: 'GET',
+            dataType: 'json',
+            timeout: 1000,
+            error: function() {
+                // If API call fails, use mock data
+                console.log('Using mock data');
+                callback(mockInventoryData);
+            },
+            success: function(data) {
+                callback(data);
+            }
+        });
+        
+        // For demo purposes, immediately use mock data
+        setTimeout(() => callback(mockInventoryData), 300);
+    }
+
+    // Load and render stats cards via jQuery and AJAX
+    function loadStatsCards() {
+        fetchDashboardData(function(data) {
+            const stats = data.stats;
+            const html = `
+                <div class="stat-card bg-white rounded-xl p-6 shadow-lg border border-slate-100">
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-sm font-medium text-slate-600">Total Products</p>
+                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-cube text-blue-700"></i>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-bold text-slate-800">${stats.totalProducts}</p>
+                    <p class="text-xs text-slate-600 mt-2"><span class="text-green-600">+${stats.thisWeekProducts}</span> this week</p>
+                </div>
+
+                <div class="stat-card bg-white rounded-xl p-6 shadow-lg border border-slate-100">
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-sm font-medium text-slate-600">Low Stock</p>
+                        <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-exclamation-triangle text-yellow-700"></i>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-bold text-yellow-700">${stats.lowStock}</p>
+                    <p class="text-xs text-slate-600 mt-2"><span class="text-red-600">Needs attention</span></p>
+                </div>
+
+                <div class="stat-card bg-white rounded-xl p-6 shadow-lg border border-slate-100">
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-sm font-medium text-slate-600">Orders Today</p>
+                        <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-shopping-cart text-green-700"></i>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-bold text-green-700">${stats.ordersToday}</p>
+                    <p class="text-xs text-slate-600 mt-2"><span class="text-green-600">↑ 12% from yesterday</span></p>
+                </div>
+
+                <div class="stat-card bg-white rounded-xl p-6 shadow-lg border border-slate-100">
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-sm font-medium text-slate-600">Revenue</p>
+                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-dollar-sign text-purple-700"></i>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-bold text-purple-700">$${stats.revenue.toLocaleString()}</p>
+                    <p class="text-xs text-slate-600 mt-2"><span class="text-green-600">+${stats.thisMonthRevenue}% this month</span></p>
+                </div>
+            `;
+            $('#statsContainer').html(html);
+        });
+    }
+
+    // Load and render orders table via jQuery and AJAX
+    function loadRecentOrders() {
+        $('#loadingSpinner').removeClass('hidden');
+        $('#ordersTableBody').html('');
+        
+        fetchDashboardData(function(data) {
+            $('#loadingSpinner').addClass('hidden');
+            const orders = data.recentOrders;
+            let html = '';
+            
+            $.each(orders, function(index, order) {
+                const statusClass = {
+                    'Completed': 'bg-green-100 text-green-700',
+                    'Processing': 'bg-blue-100 text-blue-700',
+                    'Shipped': 'bg-cyan-100 text-cyan-700',
+                    'Pending': 'bg-yellow-100 text-yellow-700'
+                }[order.status] || 'bg-slate-100 text-slate-700';
+                
+                html += `
+                    <tr class="border-b border-slate-200 hover:bg-slate-50 transition">
+                        <td class="py-3 px-4"><span class="font-mono text-blue-700 font-medium">${order.id}</span></td>
+                        <td class="py-3 px-4 text-slate-800">${order.customer}</td>
+                        <td class="py-3 px-4 font-semibold text-slate-800">${order.amount}</td>
+                        <td class="py-3 px-4"><span class="px-2 py-1 rounded ${statusClass} text-xs font-medium">${order.status}</span></td>
+                        <td class="py-3 px-4 text-slate-600">${order.date}</td>
+                    </tr>
+                `;
+            });
+            
+            $('#ordersTableBody').html(html);
+            showAlert('Orders loaded successfully!', 'success');
+        });
+    }
+
+    // Chart instances
+    let salesChart, categoryChart;
+
+    // Load Sales Chart via jQuery and AJAX
+    function loadSalesChart() {
+        fetchDashboardData(function(data) {
+            const chartData = data.salesData;
+            const ctx = document.getElementById('salesPurchaseChart').getContext('2d');
+            
+            if (salesChart) salesChart.destroy();
+            
+            salesChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartData.labels,
+                    datasets: [
+                        {
+                            label: 'Sales',
+                            data: chartData.sales,
+                            borderColor: 'rgba(37,99,235,1)',
+                            backgroundColor: 'rgba(37,99,235,0.1)',
+                            tension: 0.3,
+                            borderWidth: 2,
+                            fill: true
+                        },
+                        {
+                            label: 'Purchases',
+                            data: chartData.purchases,
+                            borderColor: 'rgba(16,185,129,1)',
+                            backgroundColor: 'rgba(16,185,129,0.1)',
+                            tension: 0.3,
+                            borderWidth: 2,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { labels: { color: 'rgba(30,41,59,1)' } } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { color: 'rgba(51,65,85,1)' }, grid: { color: 'rgba(226,232,240,1)' } },
+                        x: { ticks: { color: 'rgba(51,65,85,1)' }, grid: { color: 'rgba(226,232,240,1)' } }
+                    }
+                }
+            });
+        });
+    }
+
+    // Load Category Chart via jQuery and AJAX
+    function loadCategoryChart() {
+        fetchDashboardData(function(data) {
+            const chartData = data.categoryData;
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            
+            if (categoryChart) categoryChart.destroy();
+            
+            categoryChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: chartData.labels,
+                    datasets: [{
+                        data: chartData.data,
+                        backgroundColor: ['#2563EB', '#EA580C', '#84CC16', '#A78BFA', '#F97316']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: 'rgba(30,41,59,1)' }
+                        }
+                    }
+                }
+            });
+        });
+    }
+
+    // Show alert messages
+    function showAlert(message, type = 'info') {
+        const alertClass = {
+            'success': 'bg-green-100 text-green-800 border-green-300',
+            'error': 'bg-red-100 text-red-800 border-red-300',
+            'info': 'bg-blue-100 text-blue-800 border-blue-300'
+        }[type] || 'bg-blue-100 text-blue-800 border-blue-300';
+        
+        const alert = $(`<div class="border rounded-lg p-4 ${alertClass} mb-4 flex items-center gap-2 alert-message"><i class="fas fa-check-circle"></i><span>${message}</span></div>`);
+        $('#alertContainer').prepend(alert);
+        
+        setTimeout(() => alert.fadeOut(300, function() { $(this).remove(); }), 2500);
+    }
+
+    // Toggle mobile menu with jQuery
+    function toggleMenu() {
+        $('#sidebar').toggleClass('hidden-mobile');
+        $('#overlay').toggleClass('hidden');
+    }
+
+    // ============================================================================
+    // INITIALIZE DASHBOARD ON PAGE LOAD
+    // ============================================================================
+    $(document).ready(function() {
+        console.log('Dashboard initialized with jQuery, AJAX, and JSON');
+        
+        // Load all data
+        loadStatsCards();
+        loadSalesChart();
+        loadCategoryChart();
+        loadRecentOrders();
+        
+        // Menu toggle click handler
+        $('#menuToggle').on('click', toggleMenu);
+        $('#overlay').on('click', toggleMenu);
+        
+        // Refresh buttons with jQuery click handlers
+        $('#refreshSalesBtn').on('click', function() {
+            $(this).find('i').addClass('fa-spin');
+            loadSalesChart();
+            setTimeout(() => $(this).find('i').removeClass('fa-spin'), 600);
+            showAlert('Sales chart refreshed!', 'info');
+        });
+        
+        $('#refreshCategoryBtn').on('click', function() {
+            $(this).find('i').addClass('fa-spin');
+            loadCategoryChart();
+            setTimeout(() => $(this).find('i').removeClass('fa-spin'), 600);
+            showAlert('Category chart refreshed!', 'info');
+        });
+        
+        $('#refreshOrdersBtn').on('click', function() {
+            $(this).find('i').addClass('fa-spin');
+            loadRecentOrders();
+            setTimeout(() => $(this).find('i').removeClass('fa-spin'), 600);
+        });
+        
+        // Auto-refresh orders every 30 seconds (simulating real-time updates)
+        setInterval(loadRecentOrders, 30000);
+        
+        // Handle window resize for responsive behavior
+        $(window).on('resize', function() {
+            if ($(window).width() >= 768) {
+                $('#sidebar').removeClass('hidden-mobile');
+                $('#overlay').addClass('hidden');
+            }
+        });
+    });
+    </script>
+</body>
+</html>
