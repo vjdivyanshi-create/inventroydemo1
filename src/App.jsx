@@ -16,6 +16,9 @@ import Signup from "./pages/Signup";
 export default function App() {
   const location = useLocation();
 
+  // ✅ Check login status
+  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+
   // Titles for navbar
   const titles = {
     "/dashboard": "Dashboard",
@@ -31,17 +34,22 @@ export default function App() {
   // Auth pages check
   const isAuthPage = ["/login", "/signup"].includes(path);
 
+  // ✅ Protected Route wrapper
+  const ProtectedRoute = ({ children }) => {
+    return isLoggedIn ? children : <Navigate to="/login" />;
+  };
+
   return (
     <>
       {isAuthPage ? (
-        // 🔐 AUTH PAGES (NO SIDEBAR / NAVBAR)
+        // 🔐 AUTH PAGES
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
       ) : (
-        // 🧩 MAIN APP LAYOUT
+        // 🧩 MAIN APP
         <div className="flex min-h-screen bg-slate-100">
           
           {/* Sidebar */}
@@ -58,22 +66,79 @@ export default function App() {
             {/* Pages */}
             <div className="p-6">
               <Routes>
-                {/* 🔥 Redirect root to login */}
-                <Route path="/" element={<Navigate to="/login" />} />
+                
+                {/* ✅ FIXED: Root redirect */}
+                <Route
+                  path="/"
+                  element={
+                    <Navigate to={isLoggedIn ? "/dashboard" : "/login"} />
+                  }
+                />
 
-                {/* Main routes */}
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/inventory" element={<Inventory />} />
-                <Route path="/add-product" element={<AddProduct />} />
-                <Route path="/report" element={<Report />} />
-                <Route path="/settings" element={<SettingsPage />} />
-                <Route path="/export" element={<ExportPage />} />
+                {/* ✅ Protected routes */}
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
 
-                {/* Fallback */}
-                <Route path="*" element={<Navigate to="/login" />} />
+                <Route
+                  path="/inventory"
+                  element={
+                    <ProtectedRoute>
+                      <Inventory />
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/add-product"
+                  element={
+                    <ProtectedRoute>
+                      <AddProduct />
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/report"
+                  element={
+                    <ProtectedRoute>
+                      <Report />
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/settings"
+                  element={
+                    <ProtectedRoute>
+                      <SettingsPage />
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/export"
+                  element={
+                    <ProtectedRoute>
+                      <ExportPage />
+                    </ProtectedRoute>
+                  }
+                />
+
+                {/* ✅ Smart fallback */}
+                <Route
+                  path="*"
+                  element={
+                    <Navigate to={isLoggedIn ? "/dashboard" : "/login"} />
+                  }
+                />
               </Routes>
             </div>
-
           </div>
         </div>
       )}
