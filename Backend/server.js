@@ -854,6 +854,43 @@ app.get("/api/export/csv", async (req, res) => {
   }
 });
 
+app.get("/api/export/excel", async (req, res) => {
+  try {
+    const ownerEmail = requireRequesterEmail(req, res);
+
+    if (!ownerEmail) {
+      return;
+    }
+
+    const products = await Product.find({ ownerEmail }).sort({ createdAt: -1 });
+    const rows = [
+      ["Name", "SKU", "Category", "Quantity", "Price", "Status"],
+      ...products.map((product) => [
+        product.name,
+        product.sku,
+        product.category,
+        product.quantity,
+        product.price,
+        product.status,
+      ]),
+    ];
+
+    const csv = rows
+      .map((row) =>
+        row
+          .map((value) => `"${String(value).replace(/"/g, '""')}"`)
+          .join(",")
+      )
+      .join("\n");
+
+    res.setHeader("Content-Type", "application/vnd.ms-excel");
+    res.setHeader("Content-Disposition", "attachment; filename=inventory-export.xls");
+    return res.send(csv);
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to export inventory." });
+  }
+});
+
 app.use((req, res) => {
   return res.status(404).json({ message: `Route not found: ${req.method} ${req.originalUrl}` });
 });
